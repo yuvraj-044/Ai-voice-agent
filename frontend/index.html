@@ -8,7 +8,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
@@ -24,7 +24,7 @@
           <rect width="26" height="26" rx="6" fill="url(#logo-grad)"/>
           <path d="M7 16V10L13 7L19 10V16L13 19L7 16Z" stroke="white" stroke-width="1.3" fill="none"/>
           <circle cx="13" cy="13" r="2.5" fill="white" opacity="0.9"/>
-          <defs><linearGradient id="logo-grad" x1="0" y1="0" x2="26" y2="26"><stop stop-color="#e8735a"/><stop offset="1" stop-color="#e8a838"/></linearGradient></defs>
+          <defs><linearGradient id="logo-grad" x1="0" y1="0" x2="26" y2="26"><stop stop-color="#c2492b"/><stop offset="1" stop-color="#b97e12"/></linearGradient></defs>
         </svg>
       </div>
       <span class="nav__name">ResumeFlow</span>
@@ -40,84 +40,96 @@
        ═══════════════════════════════════════════════════════════════ -->
   <div id="view-landing" class="view active">
     <section class="hero">
-      <div class="hero__bg">
-        <img class="hero__bg-photo" src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1600&h=900&fit=crop&crop=center" alt="" loading="eager" aria-hidden="true">
-      </div>
-      <div class="hero__content">
-        <div class="hero__label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Career Assessment Platform</div>
-        <h1 class="hero__title">Practice your<br>real interview story.</h1>
-        <p class="hero__subtitle">Upload your resume and complete a personalized voice interview built around your experience.</p>
-        <button class="btn btn--primary btn--lg" onclick="App.navigate('upload')">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/><polygon points="8,6 15,10 8,14" fill="currentColor"/></svg>
-          Start My Interview
-        </button>
-        <div class="hero__features">
-          <div class="hero__feature">
-            <div class="hero__feature-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            </div>
-            <span>Resume-Based Questions</span>
+      <div class="hero__inner">
+        <div class="hero__content">
+          <div class="hero__label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg> Career Assessment Platform</div>
+          <h1 class="hero__title">Practice your<br><span class="hero__title-accent">real interview story.</span></h1>
+          <p class="hero__subtitle">Upload your resume and sit for a <strong>spoken interview</strong> built entirely from your own experience — then get an honest scorecard.</p>
+          <div class="hero__cta-row">
+            <button class="btn btn--primary btn--lg" onclick="App.navigate('upload')">
+              Start My Interview
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+            </button>
+            <span class="hero__cta-note">NO SIGN-UP · FREE · ~10 MIN</span>
           </div>
-          <div class="hero__feature">
-            <div class="hero__feature-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+          <div class="hero__features">
+            <div class="hero__feature">
+              <div class="hero__feature-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+              <span>Resume-based questions</span>
             </div>
-            <span>Voice Interview</span>
-          </div>
-          <div class="hero__feature">
-            <div class="hero__feature-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <div class="hero__feature">
+              <div class="hero__feature-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+              </div>
+              <span>Spoken answers, live follow-ups</span>
             </div>
-            <span>PDF Report</span>
+            <div class="hero__feature">
+              <div class="hero__feature-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+              <span>Scored PDF report</span>
+            </div>
           </div>
         </div>
+
+        <aside class="session-card" aria-hidden="true">
+          <div class="session-card__head">
+            <span class="session-card__brand">RESUMEFLOW</span>
+            <span class="session-card__no">Nº 001</span>
+          </div>
+          <span class="session-card__stamp">READY</span>
+          <dl class="session-card__rows">
+            <div class="session-card__row"><dt>Candidate</dt><dd>— your name here —</dd></div>
+            <div class="session-card__row"><dt>Format</dt><dd>Spoken / Typed</dd></div>
+            <div class="session-card__row"><dt>Questions</dt><dd>10 + follow-ups</dd></div>
+            <div class="session-card__row"><dt>Duration</dt><dd>≈ 10 minutes</dd></div>
+            <div class="session-card__row"><dt>Report</dt><dd>Instant PDF</dd></div>
+          </dl>
+          <div class="session-card__meters">
+            <div class="session-meter" style="--w:88%"></div>
+            <div class="session-meter" style="--w:64%"></div>
+            <div class="session-meter" style="--w:76%"></div>
+          </div>
+          <div class="session-card__foot">CLARITY · STRUCTURE · CONFIDENCE</div>
+        </aside>
       </div>
     </section>
 
-    <!-- How It Works — Photo Cards -->
+    <!-- How It Works — numbered index rows -->
     <section class="flow-preview">
-      <h2 class="section-title">How it works</h2>
-      <p class="section-subtitle">Four steps to a stronger interview presence.</p>
-      <div class="timeline">
-        <div class="timeline__item">
-          <div class="timeline__card">
-            <img class="timeline__card-img" src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&h=280&fit=crop&crop=center" alt="Upload resume" loading="lazy">
-            <div class="timeline__card-body">
-              <div class="timeline__marker">1</div>
-              <h3>Upload Resume</h3>
-              <p>Upload your PDF, DOCX, or TXT resume. We extract your experience, skills, and achievements.</p>
-            </div>
-          </div>
+      <div class="flow-preview__head">
+        <div>
+          <h2 class="section-title">How it <em>works</em></h2>
+          <p class="section-subtitle">Four steps to a stronger interview presence.</p>
         </div>
-        <div class="timeline__item">
-          <div class="timeline__card">
-            <img class="timeline__card-img" src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=400&h=280&fit=crop&crop=center" alt="Review profile" loading="lazy">
-            <div class="timeline__card-body">
-              <div class="timeline__marker">2</div>
-              <h3>Review & Confirm</h3>
-              <p>Review the extracted information. Edit any details to ensure accuracy.</p>
-            </div>
-          </div>
+        <span class="flow-preview__note">INDEX / A–D</span>
+      </div>
+      <div class="steps">
+        <div class="step-row">
+          <span class="step-row__no">STEP / A</span>
+          <h3 class="step-row__title">Upload resume</h3>
+          <p class="step-row__desc">Drop in a PDF, DOCX, or TXT. Your experience, skills, and achievements are extracted locally.</p>
+          <span class="step-row__arrow">→</span>
         </div>
-        <div class="timeline__item">
-          <div class="timeline__card">
-            <img class="timeline__card-img" src="https://images.unsplash.com/photo-1589903308904-1010c2294adc?w=400&h=280&fit=crop&crop=center" alt="Voice interview" loading="lazy">
-            <div class="timeline__card-body">
-              <div class="timeline__marker">3</div>
-              <h3>Voice Interview</h3>
-              <p>Answer personalized questions using your voice. Get dynamic follow-ups.</p>
-            </div>
-          </div>
+        <div class="step-row">
+          <span class="step-row__no">STEP / B</span>
+          <h3 class="step-row__title">Review &amp; confirm</h3>
+          <p class="step-row__desc">Check what was extracted. Fix anything off before the interview begins.</p>
+          <span class="step-row__arrow">→</span>
         </div>
-        <div class="timeline__item">
-          <div class="timeline__card">
-            <img class="timeline__card-img" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=280&fit=crop&crop=center" alt="Get report" loading="lazy">
-            <div class="timeline__card-body">
-              <div class="timeline__marker">4</div>
-              <h3>Get Your Report</h3>
-              <p>Receive a detailed scorecard with strengths, improvements, and a practice plan.</p>
-            </div>
-          </div>
+        <div class="step-row">
+          <span class="step-row__no">STEP / C</span>
+          <h3 class="step-row__title">Speak your answers</h3>
+          <p class="step-row__desc">Answer out loud — or type. The interviewer listens and asks real follow-ups.</p>
+          <span class="step-row__arrow">→</span>
+        </div>
+        <div class="step-row">
+          <span class="step-row__no">STEP / D</span>
+          <h3 class="step-row__title">Get the scorecard</h3>
+          <p class="step-row__desc">Strengths, gaps, and a practice plan — scored, explained, and downloadable as a PDF.</p>
+          <span class="step-row__arrow">→</span>
         </div>
       </div>
     </section>
@@ -155,6 +167,21 @@
         </div>
 
         <div class="upload-error" id="uploadError" style="display:none"></div>
+
+        <div class="upload-assurances">
+          <div class="upload-assurance">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
+            AI-generated questions
+          </div>
+          <div class="upload-assurance">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
+            Voice or typed answers
+          </div>
+          <div class="upload-assurance">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6L9 17l-5-5"/></svg>
+            Instant PDF report
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -200,13 +227,16 @@
             <span id="studioCompletion">0%</span>
           </div>
           <div class="progress-bar progress-bar--sm">
-            <div class="progress-bar__fill" id="studioProgressFill" style="width:0%"></div>
+            <div class="progress-bar__fill progress-bar__fill--glow" id="studioProgressFill" style="width:0%"></div>
           </div>
         </div>
 
         <!-- Current Question -->
         <div class="studio__question-area">
-          <div class="studio__category" id="studioCategory">Resume Introduction</div>
+          <div class="studio__question-top">
+            <div class="studio__category" id="studioCategory">Resume Introduction</div>
+            <span class="studio__followup-badge" id="studioFollowupBadge" style="display:none">Follow-up</span>
+          </div>
           <div class="studio__question" id="studioQuestion">Loading question...</div>
         </div>
 
@@ -276,6 +306,10 @@
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="4" width="3" height="12" rx="1"/><rect x="11" y="4" width="3" height="12" rx="1"/></svg>
             <span>Pause</span>
           </button>
+          <button class="ctrl-btn" id="btnSkip" onclick="App.skipQuestion()" title="Skip this question">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4l6 6-6 6"/><path d="M11 4l6 6-6 6"/></svg>
+            <span>Skip</span>
+          </button>
           <button class="ctrl-btn" id="btnTextInput" onclick="App.toggleTextInput()" title="Type answer instead">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="16" height="12" rx="2"/><line x1="6" y1="8" x2="14" y2="8"/><line x1="6" y1="12" x2="10" y2="12"/></svg>
             <span>Type</span>
@@ -287,6 +321,9 @@
           <div class="studio__consent" id="consentNotice" style="display:none">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="7"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.5" fill="currentColor"/></svg>
             <span>Audio is processed locally and is not stored on our servers.</span>
+          </div>
+          <div class="studio__ai-badge" id="aiBadge" title="Questions are generated by AI from your resume">
+            <span class="studio__ai-dot"></span> AI interviewer active
           </div>
           <button class="btn btn--danger btn--sm" onclick="App.endInterview()" id="btnEndInterview">
             End Interview
@@ -336,6 +373,28 @@
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2"/></svg>
             Download PDF Report
           </button>
+        </div>
+      </div>
+
+      <!-- Score Banner -->
+      <div class="score-banner">
+        <div class="score-banner__ring" id="scoreRing">
+          <svg viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="scoreRingGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop stop-color="#c2492b"/>
+                <stop offset="1" stop-color="#b97e12"/>
+              </linearGradient>
+            </defs>
+            <circle class="score-banner__ring-bg" cx="60" cy="60" r="52"/>
+            <circle class="score-banner__ring-fill" id="scoreRingFill" cx="60" cy="60" r="52"/>
+          </svg>
+          <div class="score-banner__num"><span id="scoreBannerValue">0</span>%</div>
+        </div>
+        <div class="score-banner__info">
+          <h3 id="scoreBannerHeadline">Your overall score</h3>
+          <p id="scoreBannerSub">Evaluating...</p>
+          <div class="score-banner__level" id="scoreBannerLevel"></div>
         </div>
       </div>
 
