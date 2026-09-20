@@ -2,9 +2,7 @@
    ResumeFlow Interview Studio — Main Application
    ═══════════════════════════════════════════════════════════════════ */
 
-const API = window.location.port
-  ? `http://localhost:${window.location.port}/api`
-  : 'http://localhost:8005/api';
+const API = `${window.location.protocol}//${window.location.host}/api`;
 
 /* ── Application State ─────────────────────────────────────────── */
 const State = {
@@ -246,6 +244,19 @@ const App = {
   },
 
   /* ── Interview Rendering ───────────────────────────────────── */
+  /** Speak text while glowing the question card (TTS is active). */
+  _speakWithGlow(text, cb) {
+    const qEl = document.getElementById('studioQuestion');
+    const area = qEl ? qEl.closest('.studio__question-area') : null;
+    if (qEl) qEl.classList.add('speaking');
+    if (area) area.classList.add('speaking');
+    Speech.speakConversational(text, () => {
+      if (qEl) qEl.classList.remove('speaking');
+      if (area) area.classList.remove('speaking');
+      if (cb) cb();
+    });
+  },
+
   renderInterviewQuestion(question, welcomeMsg) {
     if (!question) return;
 
@@ -257,13 +268,17 @@ const App = {
     document.getElementById('studioCategory').textContent = this.formatCategory(question.category);
     document.getElementById('studioQuestion').textContent = question.question_text;
 
+    // Show follow-up badge when the question is a dynamic follow-up
+    const badge = document.getElementById('studioFollowupBadge');
+    if (badge) badge.style.display = question.is_followup ? 'inline-block' : 'none';
+
     // Add welcome message to transcript if provided
     if (welcomeMsg && State.transcripts.length === 0) {
       this.addTranscript('system', welcomeMsg);
       // Speak welcome with conversational tone
-      Speech.speakConversational(welcomeMsg, () => {
+      this._speakWithGlow(welcomeMsg, () => {
         // After welcome, speak the first question with a natural transition
-        Speech.speakConversational(question.question_text, () => {
+        this._speakWithGlow(question.question_text, () => {
           document.getElementById('micStateText').textContent = 'Ready';
         });
       });
@@ -271,7 +286,7 @@ const App = {
       // Subsequent questions — add a natural transition
       const transition = this._getTransition();
       this.addTranscript('question', transition + question.question_text);
-      Speech.speakConversational(transition + question.question_text, () => {
+      this._speakWithGlow(transition + question.question_text, () => {
         document.getElementById('micStateText').textContent = 'Ready';
       });
     }
@@ -469,7 +484,23 @@ const App = {
   /* ── Interview Controls ────────────────────────────────────── */
   repeatQuestion() {
     const q = State.questions[State.currentQuestionIdx];
-    if (q) Speech.speakConversational(q.question_text);
+    if (q) this._speakWithGlow(q.question_text);
+  },
+
+  /** Skip the current question without submitting an answer. */
+  skipQuestion() {
+    const q = State.questions[State.currentQuestionIdx];
+    if (!q) return;
+    this.addTranscript('answer', '(Skipped this question)');
+    State.isRecording = false;
+    this.updateRecordingUI(false);
+    Speech.stopListening();
+    State.currentQuestionIdx++;
+    if (State.currentQuestionIdx < State.questions.length) {
+      this.renderInterviewQuestion(State.questions[State.currentQuestionIdx], null);
+    } else {
+      this.endInterview();
+    }
   },
 
   pauseInterview() {
@@ -539,6 +570,38 @@ const App = {
     document.getElementById('resultsSubtitle').textContent =
       `${data.candidate_name ? data.candidate_name + ' — ' : ''}${data.resume_filename || 'Resume'} • ${data.interview_date || ''}`;
 
+    // Score banner — animated ring + counting number
+    const overall = Math.max(0, Math.min(100, data.overall_score || 0));
+    const CIRC = 2 * Math.PI * 52;
+    const ring = document.getElementById('scoreRingFill');
+    if (ring) {
+      ring.style.strokeDashoffset = CIRC;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        ring.style.strokeDashoffset = CIRC * (1 - overall / 100);
+      }));
+    }
+    const scoreVal = document.getElementById('scoreBannerValue');
+    if (scoreVal) {
+      let shown = 0;
+      const step = Math.max(1, Math.round(overall / 40));
+      const iv = setInterval(() => {
+        shown = Math.min(overall, shown + step);
+        scoreVal.textContent = shown;
+        if (shown >= overall) clearInterval(iv);
+      }, 24);
+    }
+    document.getElementById('scoreBannerHeadline').textContent =
+      overall >= 80 ? 'Strong performance' :
+      overall >= 60 ? 'Solid effort with room to grow' :
+      overall >= 40 ? 'A good start — keep practicing' :
+      'Time to build your foundations';
+    document.getElementById('scoreBannerSub').textContent =
+      `${data.total_questions || 0} questions • ${data.total_followups || 0} follow-ups • ${durStr}`;
+    const level = document.getElementById('scoreBannerLevel');
+    level.textContent = data.readiness_level || 'N/A';
+    level.className = 'score-banner__level ' +
+      (overall >= 75 ? 'score-banner__level--high' : overall >= 50 ? 'score-banner__level--mid' : 'score-banner__level--low');
+
     document.getElementById('resultsOverview').innerHTML = `
       <div class="overview-card overview-card--highlight">
         <div class="overview-card__value">${data.overall_score || 0}%</div>
@@ -570,7 +633,7 @@ const App = {
     const scores = data.scores || [];
     document.getElementById('resultsScorecard').innerHTML = scores.map(s => {
       const pct = (s.score / s.max_score) * 100;
-      const color = pct >= 80 ? 'var(--emerald)' : pct >= 60 ? 'var(--blue)' : pct >= 40 ? 'var(--amber)' : 'var(--coral)';
+      const color = pct >= 80 ? 'var(--emerald)' : pct >= 60 ? 'var(--warm-blue)' : pct >= 40 ? 'var(--amber)' : 'var(--coral)';
       return `
         <div class="score-card">
           <div class="score-card__header">

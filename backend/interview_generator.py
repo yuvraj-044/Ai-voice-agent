@@ -80,12 +80,38 @@ def get_rubric_for_category(category: str) -> Dict[str, str]:
     return base_rubric
 
 
+# ── LLM Provider Configuration ──────────────────────────────────────
+
+def get_llm_config() -> Optional[Dict[str, str]]:
+    """Resolve LLM provider settings from environment variables.
+
+    Supports Groq (OpenAI-compatible) first, then OpenAI.
+    """
+    groq_key = os.getenv("GROQ_API_KEY")
+    if groq_key:
+        return {
+            "api_url": "https://api.groq.com/openai/v1/chat/completions",
+            "api_key": groq_key,
+            "model": os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"),
+        }
+
+    openai_key = os.getenv("OPENAI_API_KEY")
+    if openai_key:
+        return {
+            "api_url": "https://api.openai.com/v1/chat/completions",
+            "api_key": openai_key,
+            "model": os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        }
+
+    return None
+
+
 # ── LLM-based Question Generation ─────────────────────────────────────
 
 def generate_questions_with_llm(profile: Dict[str, Any], resume_text: str) -> Optional[List[Dict[str, Any]]]:
-    """Generate questions using OpenAI API if available."""
-    openai_key = os.getenv("OPENAI_API_KEY")
-    if not openai_key or not requests:
+    """Generate questions using an LLM API if available."""
+    config = get_llm_config()
+    if not config or not requests:
         return None
 
     profile_summary = json.dumps(profile, indent=2, default=str)[:3000]
@@ -120,13 +146,13 @@ Return ONLY a JSON array of objects. No other text."""
 
     try:
         resp = requests.post(
-            "https://api.openai.com/v1/chat/completions",
+            config["api_url"],
             headers={
-                "Authorization": f"Bearer {openai_key}",
+                "Authorization": f"Bearer {config['api_key']}",
                 "Content-Type": "application/json"
             },
             json={
-                "model": "gpt-4o-mini",
+                "model": config["model"],
                 "messages": [
                     {"role": "system", "content": "You are a professional interview question generator. Return only valid JSON."},
                     {"role": "user", "content": prompt}
@@ -301,8 +327,8 @@ def generate_followup_with_llm(
     category: str,
 ) -> Optional[str]:
     """Generate a follow-up question using LLM."""
-    openai_key = os.getenv("OPENAI_API_KEY")
-    if not openai_key or not requests:
+    config = get_llm_config()
+    if not config or not requests:
         return None
 
     prompt = f"""You are a professional interview coach conducting a personalized interview.
@@ -324,13 +350,13 @@ Return ONLY the follow-up question text. No quotes, no explanation."""
 
     try:
         resp = requests.post(
-            "https://api.openai.com/v1/chat/completions",
+            config["api_url"],
             headers={
-                "Authorization": f"Bearer {openai_key}",
+                "Authorization": f"Bearer {config['api_key']}",
                 "Content-Type": "application/json"
             },
             json={
-                "model": "gpt-4o-mini",
+                "model": config["model"],
                 "messages": [
                     {"role": "system", "content": "You are a professional interviewer. Return only the follow-up question text."},
                     {"role": "user", "content": prompt}
