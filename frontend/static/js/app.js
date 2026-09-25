@@ -141,13 +141,23 @@ const App = {
     const profile = data.profile;
     const container = document.getElementById('reviewContent');
 
-    const section = (label, value, full = false) => {
+    // Resume extractors commonly return line breaks and repeated whitespace.
+    // Preserve that structure so the review is as readable as the source resume.
+    const escapeHtml = (value) => String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+    const text = (value) => escapeHtml(value).replace(/\r?\n/g, '<br>');
+
+    const section = (label, value, full = false, isHtml = false) => {
       const isEmpty = !value || (Array.isArray(value) && value.length === 0);
       return `
         <div class="review-card${full ? ' review-card--full' : ''}">
           <div class="review-card__label">${label}</div>
           <div class="review-card__value${isEmpty ? ' review-card__value--empty' : ''}">
-            ${isEmpty ? 'Not detected' : value}
+            ${isEmpty ? 'Not detected' : (isHtml ? value : text(value))}
           </div>
         </div>`;
     };
@@ -155,7 +165,7 @@ const App = {
     const tagSection = (label, tags, warningTags = []) => {
       if (!tags || tags.length === 0) return section(label, '');
       const tagHtml = tags.map(t =>
-        `<span class="review-tag${warningTags.includes(t) ? ' review-tag--warning' : ''}">${t}</span>`
+        `<span class="review-tag${warningTags.includes(t) ? ' review-tag--warning' : ''}">${text(t)}</span>`
       ).join('');
       return `
         <div class="review-card">
@@ -168,7 +178,7 @@ const App = {
       <div class="review-card review-card--full">
         <div class="review-card__label">Candidate Name</div>
         <div class="review-card__value" style="font-size:1.1rem;font-weight:700">
-          ${profile.name || '<span class="review-card__value--empty">Not detected</span>'}
+          ${profile.name ? text(profile.name) : '<span class="review-card__value--empty">Not detected</span>'}
         </div>
       </div>
       ${section('Professional Summary', profile.summary)}
@@ -182,23 +192,23 @@ const App = {
         ? profile.companies.join(', ')
         : '', true)}
       ${section('Projects', profile.projects?.length
-        ? profile.projects.map(p => `<strong>${p.name || 'Project'}</strong>: ${p.description || ''}`).join('<br><br>')
-        : '', true)}
+        ? profile.projects.map(p => `<strong>${text(p.name || 'Project')}</strong>: ${text(p.description)}`).join('<br><br>')
+        : '', true, true)}
       ${section('Achievements', profile.achievements?.length
-        ? profile.achievements.join('<br>')
+        ? profile.achievements.join('\n')
         : '', true)}
       ${section('Education', profile.education?.length
-        ? profile.education.map(e => `${e.degree || ''}${e.institution ? ' — ' + e.institution : ''}`).join('<br>')
-        : '')}
+        ? profile.education.map(e => `${text(e.degree)}${e.institution ? ' — ' + text(e.institution) : ''}`).join('<br>')
+        : '', false, true)}
       ${tagSection('Certifications', profile.certifications)}
       ${section('Measurable Results', profile.measurable_results?.length
-        ? profile.measurable_results.join('<br>')
+        ? profile.measurable_results.join('\n')
         : '', true)}
       ${profile.missing_or_unclear?.length
         ? `<div class="review-card review-card--full">
             <div class="review-card__label">Areas Needing Clarification</div>
             <div class="review-card__tags">
-              ${profile.missing_or_unclear.map(m => `<span class="review-tag review-tag--warning">${m}</span>`).join('')}
+              ${profile.missing_or_unclear.map(m => `<span class="review-tag review-tag--warning">${text(m)}</span>`).join('')}
             </div>
           </div>`
         : ''}

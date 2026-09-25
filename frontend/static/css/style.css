@@ -461,13 +461,17 @@ img { max-width: 100%; }
   font-size: 0.62rem; font-weight: 600; text-transform: uppercase;
   letter-spacing: 0.12em; color: var(--ink-faint); margin-bottom: 0.5rem;
 }
-.review-card__value { font-size: 0.9rem; color: var(--ink); line-height: 1.5; }
+.review-card__value {
+  font-size: 0.9rem; color: var(--ink); line-height: 1.5;
+  white-space: pre-wrap; overflow-wrap: anywhere; word-spacing: normal;
+}
 .review-card__value--empty { color: var(--ink-faint); font-style: italic; }
 .review-card__tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .review-tag {
   padding: 4px 10px; border-radius: var(--radius-sm);
   background: var(--paper); border: 1px solid var(--border-strong);
-  font-size: 0.75rem; color: var(--ink-soft);
+  font-size: 0.75rem; color: var(--ink-soft); line-height: 1.35;
+  white-space: normal; overflow-wrap: anywhere; word-spacing: normal;
 }
 .review-tag--warning { background: var(--mustard-dim); border-color: var(--mustard); color: var(--mustard); }
 

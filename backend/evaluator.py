@@ -30,6 +30,120 @@ SCORE_DIMENSIONS = [
     "overall_readiness",
 ]
 
+DISPLAY_DIMENSIONS = [
+    "Relevance", "Completeness", "Specificity", "Structure",
+    "Evidence & Examples", "Resume Consistency", "Technical Depth",
+    "Communication Clarity", "Conciseness", "Overall Readiness",
+]
+
+
+def _groq_config() -> Optional[Dict[str, str]]:
+    """Return Groq configuration only when a real key is available."""
+    api_key = os.getenv("GROQ_API_KEY", "").strip()
+    if not api_key or api_key.startswith("your_"):
+        return None
+    return {
+        "api_url": "https://api.groq.com/openai/v1/chat/completions",
+        "api_key": api_key,
+        "model": os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"),
+    }
+
+
+def _extract_json_object(content: str) -> Optional[Dict[str, Any]]:
+    """Read a JSON object even if a provider wraps it in a code fence."""
+    match = re.search(r'\{[\s\S]*\}', content)
+    if not match:
+        return None
+    try:
+        value = json.loads(match.group(0))
+        return value if isinstance(value, dict) else None
+    except json.JSONDecodeError:
+        return None
+
+
+def score_answer_with_groq(
+    question: str,
+    answer: str,
+    category: str,
+    profile: Dict[str, Any],
+) -> Optional[Dict[str, Any]]:
+    """Score one answer against the actual question and resume using Groq."""
+    config = _groq_config()
+    if not config or not requests:
+        return None
+
+    resume_context = json.dumps({
+        "name": profile.get("name", ""),
+        "summary": profile.get("summary", ""),
+        "job_titles": profile.get("job_titles", []),
+        "companies": profile.get("companies", []),
+        "skills": profile.get("skills", []),
+        "tools_and_tech": profile.get("tools_and_tech", []),
+        "projects": profile.get("projects", []),
+        "achievements": profile.get("achievements", []),
+        "measurable_results": profile.get("measurable_results", []),
+    }, default=str)[:6000]
+    prompt = f"""You are an evidence-based interview assessor. Assess only the candidate's answer below against the question and supplied resume. Do not infer personality, intelligence, emotion, or any protected characteristic. Do not invent accomplishments or evidence.
+
+QUESTION: {question}
+CATEGORY: {category}
+ANSWER: {answer}
+RESUME FACTS: {resume_context}
+
+Return ONLY valid JSON in this exact shape:
+{{
+  "scores": [{{"dimension":"Relevance|Completeness|Specificity|Structure|Evidence & Examples|Resume Consistency|Technical Depth|Communication Clarity|Conciseness|Overall Readiness", "score": 1.0, "max_score": 5.0, "evidence":"brief, specific reason grounded in the answer or resume"}}],
+  "strengths": ["up to 3 evidence-based strengths"],
+  "improvements": ["up to 3 specific improvements"],
+  "suggested_answer_structure": "one concise, tailored suggestion"
+}}
+
+Provide exactly one score for every listed dimension. Use 1.0-5.0 in 0.5 increments. For Resume Consistency, use 3.0 when the answer cannot be verified from the supplied resume; do not assume it is true. Quote or clearly point to concrete details from the answer in every evidence field."""
+    try:
+        response = requests.post(
+            config["api_url"],
+            headers={"Authorization": f"Bearer {config['api_key']}", "Content-Type": "application/json"},
+            json={
+                "model": config["model"],
+                "messages": [
+                    {"role": "system", "content": "Return only valid JSON. Be evidence-based and calibrated."},
+                    {"role": "user", "content": prompt},
+                ],
+                "temperature": 0.1,
+                "max_tokens": 1800,
+            },
+            timeout=25,
+        )
+        if response.status_code != 200:
+            return None
+        content = response.json()["choices"][0]["message"]["content"].strip()
+        result = _extract_json_object(content)
+        if not result:
+            return None
+
+        raw_scores = {item.get("dimension"): item for item in result.get("scores", []) if isinstance(item, dict)}
+        if any(dimension not in raw_scores for dimension in DISPLAY_DIMENSIONS):
+            return None
+        scores = []
+        for dimension in DISPLAY_DIMENSIONS:
+            item = raw_scores[dimension]
+            try:
+                score = round(max(1.0, min(5.0, float(item.get("score", 0)))) * 2) / 2
+            except (TypeError, ValueError):
+                return None
+            evidence = str(item.get("evidence", "")).strip()
+            if not evidence:
+                return None
+            scores.append({"dimension": dimension, "score": score, "max_score": 5.0, "evidence": evidence})
+        return {
+            "scores": scores,
+            "strengths": [str(value) for value in result.get("strengths", [])[:3] if str(value).strip()],
+            "improvements": [str(value) for value in result.get("improvements", [])[:3] if str(value).strip()],
+            "suggested_answer_structure": str(result.get("suggested_answer_structure", "")).strip(),
+        }
+    except (requests.RequestException, KeyError, TypeError, ValueError):
+        return None
+
 
 def calculate_filler_words(text: str) -> int:
     """Count filler words in text."""
@@ -91,6 +205,21 @@ def score_answer(
     answer_lower = answer.lower().strip()
     words = answer.split()
     word_count = len(words)
+
+    # Groq is the primary evaluator. Its reasons are tied to this exact
+    # question, answer, and resume rather than to a synthetic score formula.
+    groq_evaluation = score_answer_with_groq(question, answer, category, profile)
+    if groq_evaluation:
+        groq_evaluation.update({
+            "filler_word_count": calculate_filler_words(answer),
+            "repeated_phrases": calculate_repeated_phrases(answer),
+            "speaking_pace": calculate_speaking_pace(word_count, duration_seconds),
+            "word_count": word_count,
+            "has_examples": bool(re.search(r'for example|such as|specifically|for instance|when i|i built|i created|i designed|i implemented|i led|i managed|i developed', answer_lower)),
+            "has_metrics": bool(re.search(r'\d+[%$x]|\d+\.\d+|percent|million|billion|thousand|\d+x\b', answer_lower)),
+            "evaluation_source": "groq",
+        })
+        return groq_evaluation
 
     # ── Basic Metrics ──────────────────────────────────────────────
     has_metrics = bool(re.search(r'\d+[%$x]|\d+\.\d+|percent|million|billion|thousand|\d+x\b', answer_lower))
@@ -271,6 +400,7 @@ def score_answer(
         "word_count": word_count,
         "has_examples": has_examples,
         "has_metrics": has_metrics,
+        "evaluation_source": "rule_based_fallback",
     }
 
 

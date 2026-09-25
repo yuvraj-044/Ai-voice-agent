@@ -43,6 +43,8 @@ ResumeFlow Interview Studio/
 │   ├── evaluator.c             # Legacy C evaluator (unused)
 │   └── Makefile
 ├── requirements.txt
+├── Dockerfile                  # Hugging Face Spaces (Docker) deployment
+├── run.sh                      # Local run script (port 8005)
 ├── .env.example
 └── README.md
 ```
@@ -56,6 +58,8 @@ ResumeFlow Interview Studio/
 - **Voice**: Web Speech API (browser-native STT & TTS)
 - **PDF**: reportlab (server-side)
 - **Resume Parsing**: pdfplumber / python-docx
+- **LLM (optional)**: Groq (recommended, free tier) or OpenAI, via REST
+- **Deployment**: Docker (Hugging Face Spaces ready)
 
 ---
 
@@ -76,13 +80,34 @@ cp .env.example .env
 
 ### 3. Start the Server
 
+Using the run script (recommended, port 8005):
+
 ```bash
-uvicorn backend.app:app --host 127.0.0.1 --port 8000 --reload
+./run.sh
+```
+
+Or directly with uvicorn:
+
+```bash
+uvicorn backend.app:app --host 127.0.0.1 --port 8005 --reload
 ```
 
 ### 4. Open the Application
 
-Navigate to: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+Navigate to: [http://127.0.0.1:8005](http://127.0.0.1:8005)
+
+---
+
+## Deployment (Docker)
+
+The repo ships with a `Dockerfile` ready for [Hugging Face Spaces](https://huggingface.co/spaces) (see `README.space.md`) or any Docker host:
+
+```bash
+docker build -t resumeflow .
+docker run -p 7860:7860 -e GROQ_API_KEY=your_key resumeflow
+```
+
+The container serves on port `7860` and runs as a non-root user with a writable SQLite database inside `/app`.
 
 ---
 
@@ -90,9 +115,11 @@ Navigate to: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `OPENAI_API_KEY` | No | Enables LLM-powered question generation and follow-ups |
-| `GEMINI_API_KEY` | No | Alternative LLM provider (not yet implemented) |
-| `PORT` | No | Server port (default: 8000) |
+| `GROQ_API_KEY` | No | Recommended (free tier). Enables LLM-powered question generation and follow-ups |
+| `GROQ_MODEL` | No | Override the Groq model (default: `openai/gpt-oss-120b`) |
+| `OPENAI_API_KEY` | No | OpenAI fallback if `GROQ_API_KEY` is not set |
+| `GEMINI_API_KEY` | No | Reserved for future use (not yet implemented) |
+| `PORT` | No | Server port (default: 8005 locally, 7860 in Docker) |
 | `HOST` | No | Server host (default: 127.0.0.1) |
 
 The application works fully without any API keys. LLM keys enhance question quality but the rule-based fallback provides a complete experience.
@@ -115,7 +142,8 @@ The application works fully without any API keys. LLM keys enhance question qual
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/api/health` | Health check |
-| `POST` | `/api/resume/upload` | Upload and parse resume |
+| `POST` | `/api/resume/upload` | Upload and parse resume (PDF/DOCX/TXT) |
+| `POST` | `/api/resume/upload-text` | Upload resume as raw text |
 | `GET` | `/api/resume/{id}` | Get parsed resume data |
 | `PUT` | `/api/resume/{id}` | Update resume information |
 | `POST` | `/api/interview/start` | Start interview session |
